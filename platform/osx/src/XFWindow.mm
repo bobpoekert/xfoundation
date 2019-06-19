@@ -7,66 +7,66 @@ XF_Event *xf_translate_nsevent(NSEvent *inp) {
     XF_Event_Mouse_Subtype mouseSubtype;
     XF_Event_Key_Subtype keySubtype;
     XF_Event_Gesture_Subtype gestureSubtype;
-    switch([inp type]) {
+    switch(inp.type) {
 
         /* mouse events */
-        case NSEvent.EventType.leftMouseDown:
+        case NSEventTypeLeftMouseDown:
             eventType = MOUSE;
             mouseSubtype = MOUSE_DOWN;
             break;
-        case NSEvent.EventType.leftMouseUp:
+        case NSEventTypeLeftMouseUp:
             eventType = MOUSE;
             mouseSubtype = MOUSE_UP;
             break;
-        case NSEvent.EventType.rightMouseDown:
+        case NSEventTypeRightMouseDown:
             eventType = MOUSE;
             mouseSubtype = RIGHT_MOUSE_DOWN;
             break;
-        case NSEvent.EventType.rightMouseUp:
+        case NSEventTypeRightMouseUp:
             eventType = MOUSE;
             mouseSubtype = RIGHT_MOUSE_UP;
             break;
-        case NSEvent.EventType.mouseMoved:
+        case NSEventTypeMouseMoved:
             eventType = MOUSE;
             mouseSubtype = MOUSE_MOVED;
             break;
-        case NSEvent.EventType.mouseEntered:
+        case NSEventTypeMouseEntered:
             eventType = MOUSE;
             mouseSubtype = MOUSE_ENTERED;
             break;
-        case NSEvent.EventType.scrollWheel:
+        case NSEventTypeScrollWheel:
             NSPoint loc = inp.locationInWindow;
             return xf_make_event_scroll(inp.deltaX, inp.deltaY, inp.deltaZ, loc.x, loc.y);
-        case NSEvent.EventType.mouseExited:
+        case NSEventTypeMouseExited:
             eventType = MOUSE;
             mouseSubtype = MOUSE_EXITED;
             break;
 
 
         /* key events */
-        case NSEvent.EventType.keyDown:
+        case NSEventTypeKeyDown:
             eventType = KEY;
             keySubtype = KEY_DOWN;
             break;
-        case NSEvent.EventType.keyUP:
+        case NSEventTypeKeyUp:
             eventType = KEY;
             keySubtype = KEY_UP;
             break;
 
         /* gesture events */
-        case NSEvent.EventType.magnify:
+        case NSEventTypeMagnify:
             eventType = GESTURE;
             gestureSubtype = MAGNIFY;
             break
-        case NSEvent.EventType.swipe:
+        case NSEventTypeSwipe:
             eventType = GESTURE;
             gestureSubtype = SWIPE;
             break;
-        case NSEvent.EventType.rotate:
+        case NSEventTypeRotate:
             eventType = GESTURE;
             gestureSubtype = ROTATE;
             break;
-        case NSEvent.EventType.smartMagnify:
+        case NSEventTypeSmartMagnify:
             eventType = GESTURE;
             gestureSubtype = SMART_MAGNIFY;
             break;
