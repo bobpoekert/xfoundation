@@ -144,3 +144,4 @@ XF_Event_Mouse *xf_make_event_mouse(
 XF_Event_Window *xf_make_event_window(
     XF_Event_Window_Subtype type, double top_left_x, double top_left_y, double width, double height);
 XF_Event_App *xf_make_event_app(XF_Event_App_Subtype type);
+void xf_event_swap_buffers();

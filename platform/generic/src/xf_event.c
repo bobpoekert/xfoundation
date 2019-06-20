@@ -76,11 +76,13 @@ XF_Event_App *xf_make_event_app(XF_Event_App_Subtype type) {
 }
 
 void xf_event_init() {
-    xf_global_event_queue = xf_buffer_queue_create(sizeof(XF_Event *), 1024, 256);
+    xf_global_event_queue = xf_buffer_queue_create(4096);
 }
 
 XF_Event *pop_event() {
-    XF_Event *res;
-    xf_buffer_queue_take(xf_global_event_queue, &res);
-    return res;
+    return (XF_Event *) xf_buffer_queue_take(xf_global_event_queue);
+}
+
+void xf_event_swap_buffers() {
+    xf_buffer_queue_swap(xf_global_event_queue);
 }
