@@ -19,5 +19,8 @@ lib/XFWindow.o: ../generic/lib/xf_platform.a
 		./src/XFWindow.mm\
 		-o ./lib/XFWindow.o
 
-lib/xf_platform.a: lib/XFWindow.o ../generic/lib/xf_platform.a 
-	ar -cvq lib/xf_platform.a lib/XFWindow.o ../generic/lib/*.o ./lib/*/*.o
+lib/main.o: 
+	clang -c -I../generic/include -I./include -I`ocamlopt -where` ./src/main.c -o lib/main.o
+
+lib/xf_platform.a: lib/XFWindow.o ../generic/lib/xf_platform.a lib/main.o
+	ar -cvq lib/xf_platform.a lib/XFWindow.o lib/main.o ../generic/lib/*.o ./lib/*/*.o
