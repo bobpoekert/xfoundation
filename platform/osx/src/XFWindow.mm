@@ -7,6 +7,11 @@ XF_Event *xf_translate_nsevent(NSEvent *inp) {
     XF_Event_Mouse_Subtype mouseSubtype;
     XF_Event_Key_Subtype keySubtype;
     XF_Event_Gesture_Subtype gestureSubtype;
+    NSPoint loc = inp.locationInWindow;
+    int windowNumber = inp.windowNumber;
+    int nClicks = inp.clickCount;
+    uint16_t keycode = inp.keyCode;
+    double magnitude = (gestureSubtype == MAGNIFY) ? inp.magnification : 0.0;
     switch(inp.type) {
 
         /* mouse events */
@@ -35,8 +40,7 @@ XF_Event *xf_translate_nsevent(NSEvent *inp) {
             mouseSubtype = MOUSE_ENTERED;
             break;
         case NSEventTypeScrollWheel:
-            NSPoint loc = inp.locationInWindow;
-            return xf_make_event_scroll(inp.deltaX, inp.deltaY, inp.deltaZ, loc.x, loc.y);
+            return (XF_Event *) xf_make_event_scroll(inp.deltaX, inp.deltaY, inp.deltaZ, loc.x, loc.y);
         case NSEventTypeMouseExited:
             eventType = MOUSE;
             mouseSubtype = MOUSE_EXITED;
@@ -57,7 +61,7 @@ XF_Event *xf_translate_nsevent(NSEvent *inp) {
         case NSEventTypeMagnify:
             eventType = GESTURE;
             gestureSubtype = MAGNIFY;
-            break
+            break;
         case NSEventTypeSwipe:
             eventType = GESTURE;
             gestureSubtype = SWIPE;
@@ -73,24 +77,18 @@ XF_Event *xf_translate_nsevent(NSEvent *inp) {
 
         default:
             [NSApp sendEvent:inp];
-            return XF_EVENT_UNK;
+            return &XF_EVENT_UNK;
     }
     switch(eventType) {
         case MOUSE:
-            NSPoint loc = inp.locationInWindow;
-            int windowNumber = inp.windowNumber;
-            int nClicks = inp.clickCount;
-            return xf_make_event_mouse(mouseSubtype, windowNumber, loc.x, loc.y, n_clicks);
+            return (XF_Event *) xf_make_event_mouse(mouseSubtype, windowNumber, loc.x, loc.y, nClicks);
         case KEY:
-            uint16_t keycode = inp.keyCode;
-            return xf_make_event_keyboard(keySubtype, keycode);
+            return (XF_Event *) xf_make_event_keyboard(keySubtype, keycode);
         case GESTURE:
-            NSPoint loc = inp.locationInWindow;
-            double magnitude = (gestureSubtype == MAGNIFY) ? inp.magnification : 0.0;
-            return xf_make_event_gesture(gestureSubtype, loc.x, loc.y, magnitude);
+            return (XF_Event *) xf_make_event_gesture(gestureSubtype, loc.x, loc.y, magnitude);
 
         default:
-            return XF_EVENT_UNK;
+            return &XF_EVENT_UNK;
     }
 }
 
@@ -105,14 +103,10 @@ XF_Event *xf_poll_event() {
 }
 
 XF_Event_Window *xf_window_event_from_nswindow(NSWindow *win, XF_Event_Window_Subtype type) {
-    XF_Event_Window *res = xf_event_window_alloc();
-    NSRect frame = [frame win];
-    res->type = type;
-    res->top_left_x = frame.origin.x;
-    res->top_left_y = frame.origin.y;
-    res->width = [NSWidth frame];
-    res->height = [NSHeight frame];
-    return res;
+    NSRect frame = [win frame];
+    return xf_make_event_window(type, 
+        NSMinX(frame), NSMinY(frame),
+        NSWidth(frame), NSHeight(frame));
 }
 
 @interface XFApplication : NSApplication
@@ -120,16 +114,16 @@ XF_Event_Window *xf_window_event_from_nswindow(NSWindow *win, XF_Event_Window_Su
 @end
 
 @implementation XFApplication 
--(void)sendEvent(NSEvent *)nsEvt 
+-(void)sendEvent:(NSEvent *)nsEvt 
 {
     xf_push_event(xf_translate_nsevent(nsEvt));
 }
 @end
 
 @implementation XFWindowDelegate 
--(id)initWithWindow:(XFWindow *)window 
+-(id)initWithWindow:(NSWindow *)window 
 {
-    self = [super init]
+    self = [super init];
     if (self != nil) {
         mWindow = window;
     }
@@ -139,33 +133,41 @@ XF_Event_Window *xf_window_event_from_nswindow(NSWindow *win, XF_Event_Window_Su
 
 -(BOOL)windowShouldClose:(id)sender
 {
-    xf_push_event(xf_window_event_from_nswindow(window, CLOSING));
+    xf_push_event(xf_make_event_app(CLOSING));
     return NO;
 }
 
 -(void)windowDidResize:(NSNotification *)notification 
 {
-    xf_push_event(xf_window_event_from_nswindow(window, RESIZE));
+    xf_push_event(xf_window_event_from_nswindow(mWindow, RESIZE));
 }
 
 -(void)windowDidMove:(NSNotification *)notification
 {
-    xf_push_event(xf_window_event_from_nswindow(window, MOVE));
+    xf_push_event(xf_window_event_from_nswindow(mWindow, MOVE));
 }
 
 -(void)windowDidBecomeKey:(NSNotification *)notification
 {
-    xf_push_event(xf_window_event_from_nswindow(window, FOCUS));
+    xf_push_event(xf_make_event_app(FOCUS));
 }
 
 -(void)windowDidResignKey:(NSNotification *)notification
 {
-    xf_push_event(xf_window_event_from_nswindow(window, BLUR));
+    xf_push_event(xf_make_event_app(BLUR));
 }
 
 @end
 
-@implementation ContentView 
+@implementation XFContentView 
+
+-(id)initWithWindow:(NSWindow *)window 
+{
+    if (window != nil) {
+        mWindow = window;
+    }
+    return self;
+}
 
 // Helps with performance
 - (BOOL)isOpaque
@@ -206,6 +208,32 @@ XF_Event_Window *xf_window_event_from_nswindow(NSWindow *win, XF_Event_Window_Su
 }
 @end
 
+@implementation XFApplicationDelegate 
+
+
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
+{
+    xf_push_event(xf_make_event_app(CLOSING));
+    return NSTerminateNow;
+}
+
+- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender
+{
+    return YES;
+}
+
+- (void)applicationDidHide:(NSNotification *)notification
+{
+    xf_push_event(xf_make_event_app(HIDE));
+}
+
+- (void)applicationWillUnhide:(NSNotification *)notification 
+{
+    xf_push_event(xf_make_event_app(UNHIDE));
+}
+
+@end
+
 static bool xf_init_appkit() {
     if (NSApp != nil)
     {
@@ -213,13 +241,13 @@ static bool xf_init_appkit() {
     }
 
     // Initialize the global variable "NSApp"
-    [Application sharedApplication];
+    [NSApplication sharedApplication];
 
     // Make us appear in the dock
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
     // Register our global event handler
-    gApplicationDelegate = [[ApplicationDelegate alloc] init];
+    XFApplicationDelegate *gApplicationDelegate = [[XFApplicationDelegate alloc] init];
     if (gApplicationDelegate == nil)
     {
         return false;
@@ -233,12 +261,11 @@ static bool xf_init_appkit() {
     return true;
 }
 
-static EGLNativeWindowType xf_init_window(char *name, size_t width, size_t height, 
-    XF_FrameCallback callback) {
+static EGLNativeWindowType xf_init_window(char *name, size_t width, size_t height) {
     
     unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask |
                              NSMiniaturizableWindowMask;
-    NSWindow mWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height)
+    NSWindow *mWindow = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, width, height)
                                           styleMask:styleMask
                                             backing:NSBackingStoreBuffered
                                               defer:NO];
@@ -248,14 +275,14 @@ static EGLNativeWindowType xf_init_window(char *name, size_t width, size_t heigh
         return 0;
     }
 
-    mDelegate = [[WindowDelegate alloc] initWithWindow:this];
+    XFWindowDelegate *mDelegate = [[XFWindowDelegate alloc] initWithWindow:mWindow];
     if (mDelegate == nil)
     {
         return 0;
     }
     [mWindow setDelegate:static_cast<id>(mDelegate)];
 
-    ContentView mView = [[ContentView alloc] initWithWindow:mWindow];
+    XFContentView *mView = [[XFContentView alloc] initWithWindow:mWindow];
     if (mView == nil)
     {
         return 0;
@@ -277,13 +304,14 @@ long frame_prev_time;
 long frame_time;
 
 
-CVReturn *xf_cvdisplay_poller(
+CVReturn xf_cvdisplay_poller(
     CVDisplayLinkRef displayLink, const CVTimeStamp *inNow, const CVTimeStamp *inOutputTime,
     CVOptionFlags flagsIn, CVOptionFlags *flagsOut, void *displayLinkContext) {
         double scale_factor = (inOutputTime->videoTimeScale) / 1000000;
         frame_prev_time = frame_time;
         frame_time = inOutputTime->hostTime * scale_factor;
         pthread_cond_broadcast(&frame_cond);
+        return kCVReturnSuccess;
 }
 
 long xf_wait_for_frame() {
@@ -298,15 +326,14 @@ long xf_wait_for_frame() {
     }
 }
 
-static EGLNativeWindowType xf_init_app(
+EGLNativeWindowType xf_init_app(
     char *name, size_t width, size_t height) {
     if (!xf_init_appkit()) return 0;
-    pthread_cond_init(&frame_cond);
+    pthread_cond_init(&frame_cond, 0);
     frame_time = 0;
     frame_prev_time = 0;
     CVDisplayLinkRef displayRef;
     CVDisplayLinkCreateWithActiveCGDisplays(&displayRef);
-    CVDisplayLinkGetCurrentCGDisplay(displayRef);
     CVDisplayLinkSetOutputCallback(displayRef, xf_cvdisplay_poller, 0);
     return xf_init_window(name, width, height);
 }

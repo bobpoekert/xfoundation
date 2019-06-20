@@ -1,6 +1,9 @@
+#pragma once
+
 #include <stdint.h>
 #include <stdlib.h>
-#include <readerwriterqueue.h>
+
+#include <xf_bufferqueue.h>
 
 typedef enum {
 
@@ -10,7 +13,7 @@ typedef enum {
     KEY,
     GESTURE,
     WINDOW, /* move, resize, etc */
-    OOM, /* memory warning */
+    APP, /* closing, backgrounded, etc */
     UNK /* unknown or invalid */
 
 } XF_Event_Type;
@@ -30,7 +33,7 @@ typedef enum {
     MOUSE_EXITED,
     RIGHT_MOUSE_DOWN,
     RIGHT_MOUSE_DRAGGED,
-    RIGHT_MODE_UP,
+    RIGHT_MOUSE_UP,
     OTHER_MOUSE_DOWN,
     OTHER_MOUSE_DRAGGED,
     OTHER_MOUSE_UP
@@ -54,7 +57,7 @@ typedef enum {
 
 } XF_Event_Key_Subtype;
 
-typedef XF_Event_Key {
+typedef struct XF_Event_Key {
     XF_Event event;
     XF_Event_Key_Subtype type;
     uint16_t keycode;
@@ -87,16 +90,12 @@ typedef struct XF_Event_Gesture {
     double magnitude;
 } XF_Event_Gesture;
 
-enum {
+typedef enum {
 
-    CLOSING,
     MOVE,
     RESIZE,
-    FOCUS,
-    BLUR,
     MINIMIZE,
-    MAXIMIZE,
-    HIDE
+    MAXIMIZE
 
 } XF_Event_Window_Subtype;
 
@@ -113,12 +112,35 @@ typedef struct XF_Event_Window {
 
 } XF_Event_Window;
 
-typedef EventQueue ReaderWriterQueue<XF_Event *>;
+typedef enum {
+    CLOSING,
+    FOCUS,
+    BLUR,
+    HIDE,
+    UNHIDE
+} XF_Event_App_Subtype;
 
-extern EventQueue xf_global_event_queue;
+typedef struct XF_Event_App {
+    XF_Event event;
+    XF_Event_App_Subtype type;
+} XF_Event_App;
 
-#define xf_push_event(evt) (evt ? (xf_global_event_queue->enqueue(evt)) : 0)
+extern XF_Buffer_Queue *xf_global_event_queue;
+
+#define xf_push_event(evt) xf_buffer_queue_append(xf_global_event_queue, evt)
 
 void xf_event_init();
 XF_Event *xf_pop_event();
 
+
+XF_Event_Key *xf_make_event_keyboard(XF_Event_Key_Subtype subtype, uint16_t keycode);
+XF_Event_Scroll *xf_make_event_scroll(double x, double y, double dx, double dy, double dz);
+XF_Event_Gesture *xf_make_event_gesture(XF_Event_Gesture_Subtype type, double x, double y, double magnitude);
+XF_Event_Mouse *xf_make_event_mouse(
+    XF_Event_Mouse_Subtype type,
+    int window_number,
+    double x, double y,
+    int n_clicks);
+XF_Event_Window *xf_make_event_window(
+    XF_Event_Window_Subtype type, double top_left_x, double top_left_y, double width, double height);
+XF_Event_App *xf_make_event_app(XF_Event_App_Subtype type);

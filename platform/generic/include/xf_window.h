@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 #include <xf_event.h>
 #include <EGL/egl.h>

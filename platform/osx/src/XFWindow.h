@@ -9,18 +9,20 @@
 #include <xf_window.h>
 
 
-class XFWindow;
-
 @interface XFWindowDelegate : NSObject {
-    XFWindow *mWindow;
+    NSWindow *mWindow;
 }
--(id)initWithWindow:(XFWindow *)window;
+-(id)initWithWindow:(NSWindow *)window;
 @end 
 
-@interface ContentView : NSView {
-    XFoundationWindow *mWindow;
+@interface XFContentView : NSView {
+    NSWindow *mWindow;
     NSTrackingArea *mTrackingArea;
     int mCurrentModifier;
 }
--(id)initWithWindow:(XFWindow *)window; 
+-(id)initWithWindow:(NSWindow *)window; 
 @end 
+
+@interface XFApplicationDelegate : NSObject <NSApplicationDelegate> {
+}
+@end

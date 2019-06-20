@@ -20,8 +20,7 @@ void mainloop() {
 
 int xf_main(int argc, char **argv) {
     pthread_t ocaml_thread;
-    xf_init_global_event_queue();
-    xf_init_global_command_queue();
+    xf_event_init();
 
     char **caml_argv = malloc(sizeof(char *) * (argc + 1));
     memcpy(caml_argv, argv, sizeof(char *) * argc);
