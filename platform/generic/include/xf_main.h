@@ -14,4 +14,4 @@
 #include <xf_window.h>
 #include <xf_bufferqueue.h>
 
-int xf_main(int argc, char **argv);
+void xf_main(char *name, int window_width, int window_height);

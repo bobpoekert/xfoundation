@@ -1,4 +1,5 @@
 #include "XFWindow.h"
+#include <dlfcn.h>
 
 XF_Event *xf_translate_nsevent(NSEvent *inp) {
     if (!inp) return 0;
@@ -92,7 +93,7 @@ XF_Event *xf_translate_nsevent(NSEvent *inp) {
     }
 }
 
-XF_Event *xf_poll_event() {
+extern XF_Event *xf_poll_event() {
     NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny
                         untilDate:nil
                         inMode:NSDefaultRunLoopMode
@@ -234,7 +235,7 @@ XF_Event_Window *xf_window_event_from_nswindow(NSWindow *win, XF_Event_Window_Su
 
 @end
 
-static bool xf_init_appkit() {
+bool xf_init_appkit() {
     if (NSApp != nil)
     {
         return true;
@@ -314,7 +315,7 @@ CVReturn xf_cvdisplay_poller(
         return kCVReturnSuccess;
 }
 
-long xf_wait_for_frame() {
+extern long xf_wait_for_frame() {
     pthread_mutex_t mutex;
     pthread_mutex_init(&mutex, 0);
     pthread_cond_wait(&frame_cond, &mutex);
@@ -326,8 +327,11 @@ long xf_wait_for_frame() {
     }
 }
 
-EGLNativeWindowType xf_init_app(
+extern EGLNativeWindowType xf_init_app(
     char *name, size_t width, size_t height) {
+    dlopen("./libEGL.dylib", RTLD_NOW | RTLD_GLOBAL);
+    dlopen("./libGLESv2.dylib", RTLD_NOW | RTLD_GLOBAL);
+    
     if (!xf_init_appkit()) return 0;
     pthread_cond_init(&frame_cond, 0);
     frame_time = 0;

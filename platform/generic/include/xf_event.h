@@ -129,19 +129,19 @@ extern XF_Buffer_Queue *xf_global_event_queue;
 
 #define xf_push_event(evt) xf_buffer_queue_append(xf_global_event_queue, evt)
 
-void xf_event_init();
-XF_Event *xf_pop_event();
+extern void xf_event_init();
+extern XF_Event *xf_pop_event();
 
 
-XF_Event_Key *xf_make_event_keyboard(XF_Event_Key_Subtype subtype, uint16_t keycode);
-XF_Event_Scroll *xf_make_event_scroll(double x, double y, double dx, double dy, double dz);
-XF_Event_Gesture *xf_make_event_gesture(XF_Event_Gesture_Subtype type, double x, double y, double magnitude);
-XF_Event_Mouse *xf_make_event_mouse(
+extern XF_Event_Key *xf_make_event_keyboard(XF_Event_Key_Subtype subtype, uint16_t keycode);
+extern XF_Event_Scroll *xf_make_event_scroll(double x, double y, double dx, double dy, double dz);
+extern XF_Event_Gesture *xf_make_event_gesture(XF_Event_Gesture_Subtype type, double x, double y, double magnitude);
+extern XF_Event_Mouse *xf_make_event_mouse(
     XF_Event_Mouse_Subtype type,
     int window_number,
     double x, double y,
     int n_clicks);
-XF_Event_Window *xf_make_event_window(
+extern XF_Event_Window *xf_make_event_window(
     XF_Event_Window_Subtype type, double top_left_x, double top_left_y, double width, double height);
-XF_Event_App *xf_make_event_app(XF_Event_App_Subtype type);
-void xf_event_swap_buffers();
+extern XF_Event_App *xf_make_event_app(XF_Event_App_Subtype type);
+extern void xf_event_swap_buffers();
