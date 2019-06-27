@@ -1,0 +1,6 @@
+(library
+    (name xf_platform_js)
+    (variant js)
+    (implements xf_gl)
+    (libraries lwt)
+    (preprocess lwt_ppx js_of_ocaml.ppx))

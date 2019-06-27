@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style>
+            canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="gl_boilerplate.js"></script>
+        <script>
+            window.onload = function() {
+                var image = new Image();
+                image.onload = function() {
+                    var gl = createGLContext();
+                    var texts = [];
+                    for (var i=0; i < 100; i++) {
+                        var str_v = i.toString();
+                        //var quad = textQuad(gl, 64, 64, str_v, 20);
+                        //var quad = colorQuad(gl, 64, 64, 'blue');
+                        var quad = imageQuad(gl, image);
+                        quad.x = Math.random() * 800;
+                        quad.y = Math.random() * 600;
+                        texts.push(quad);
+                    }
+                    renderLoop(gl, function(gl, interval) {
+                        var maxWidth = getPageWidth();
+                        var maxHeight = getPageHeight();
+                        var stepX = maxWidth / Math.sqrt(texts.length);
+                        var stepY = maxHeight / Math.sqrt(texts.length);
+                        var offsetX = -100;
+                        var offsetY = -100;
+                        for (var i=0; i < texts.length; i++) {
+                            var quad = texts[i];
+                            quad.x = (Math.sin(interval / 100) * 10) + offsetX;
+                            quad.y = (Math.sin(interval / 100) * 10) + offsetY;
+                            offsetX += stepX;
+                            if (offsetX > maxWidth) {
+                                offsetX = 0;
+                                offsetY += stepY;
+                            }
+                        }
+
+                        renderQuads(gl, texts);
+                    });
+                };
+                image.src = 'test.png';
+            };
+        </script>
+    </body>
+</html>

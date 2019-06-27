@@ -14,4 +14,6 @@
 
 (library
     (name xf_platform_osx)
-    (self_build_stubs_archive xf_platform))
+    (variant osx)
+    (self_build_stubs_archive xf_platform)
+    (implements xf_gl))

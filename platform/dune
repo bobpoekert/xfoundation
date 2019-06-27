@@ -1,0 +1,3 @@
+(library
+    (name xf_platform)
+    (virtual_modules xf_gl))

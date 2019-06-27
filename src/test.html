@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    </head>
+    <body>
+        <script>document.write('<script src="gl_boilerplate.js?'+Math.random()+'"></script>');</script>
+        <script>
+            var gl = createGLContext();
+            var texts = [];
+            for (var i=0; i < 100; i++) {
+                var str_v = i.toString();
+                var quad = textQuad(gl, str_v, 50, 20, 10);
+                makeQuadHavePosition(quad);
+                quad.x = Math.random() * 800;
+                quad.y = Math.random() * 600;
+                texts.push(quad);
+            }
+            renderLoop(gl, function(gl, interval) {
+                for (var i=0; i < quads.length; i++) {
+                    var quad = quads[i];
+                    quad.x += Math.sin(interval);
+                    quad.y += Math.sin(interval);
+                }
+
+                renderQuads(gl, quads);
+            });
+        </script>
+    </body>
+</html>
