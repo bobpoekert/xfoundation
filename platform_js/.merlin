@@ -1,0 +1,11 @@
+EXCLUDE_QUERY_DIR
+B /Users/bob/.opam/4.08.0/lib/bytes
+B /Users/bob/.opam/4.08.0/lib/js_of_ocaml
+B /Users/bob/.opam/4.08.0/lib/uchar
+B ../_build/default/platform_js/.xf_platform_js.objs/byte
+S /Users/bob/.opam/4.08.0/lib/bytes
+S /Users/bob/.opam/4.08.0/lib/js_of_ocaml
+S /Users/bob/.opam/4.08.0/lib/uchar
+S .
+FLG -ppx '/Users/bob/code/xfoundation/_build/default/.ppx/3edf09989a28fce237f8b735bd39446a/ppx.exe --as-ppx --cookie '\''library-name="xf_platform_js"'\'''
+FLG -open Xf_platform_js -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs

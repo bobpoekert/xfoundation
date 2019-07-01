@@ -1,0 +1,3 @@
+(executable
+    (name xf_platform_js_test)
+    (libraries xf_platform_js))

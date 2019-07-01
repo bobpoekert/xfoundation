@@ -17,13 +17,13 @@
                 image.onload = function() {
                     var gl = createGLContext();
                     var texts = [];
-                    for (var i=0; i < 100; i++) {
+                    for (var i=0; i < 500; i++) {
                         var str_v = i.toString();
-                        //var quad = textQuad(gl, 64, 64, str_v, 20);
+                        var quad = textQuad(gl, 128, 128, str_v, 50);
                         //var quad = colorQuad(gl, 64, 64, 'blue');
-                        var quad = imageQuad(gl, image);
-                        quad.x = Math.random() * 800;
-                        quad.y = Math.random() * 600;
+                        //var quad = imageQuad(gl, image);
+                        quad.width = 64;
+                        quad.height = 64;
                         texts.push(quad);
                     }
                     renderLoop(gl, function(gl, interval) {
@@ -31,12 +31,16 @@
                         var maxHeight = getPageHeight();
                         var stepX = maxWidth / Math.sqrt(texts.length);
                         var stepY = maxHeight / Math.sqrt(texts.length);
-                        var offsetX = -100;
-                        var offsetY = -100;
+                        var offsetX = 0;
+                        var offsetY = 0;
                         for (var i=0; i < texts.length; i++) {
                             var quad = texts[i];
-                            quad.x = (Math.sin(interval / 100) * 10) + offsetX;
-                            quad.y = (Math.sin(interval / 100) * 10) + offsetY;
+                            var s = (Math.sin(interval / 200) * 10);
+                            var c = (Math.cos(interval / 200) * 10);
+                            quad.x = s + offsetX;
+                            quad.y = c + offsetY;
+                            quad.width = 64 + s * 2;
+                            quad.height = 64 + c * 2;
                             offsetX += stepX;
                             if (offsetX > maxWidth) {
                                 offsetX = 0;

@@ -1,3 +1,4 @@
 (library
     (name xf_platform)
-    (virtual_modules xf_gl))
+    (virtual_modules xf_composite))
+

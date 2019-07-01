@@ -1,0 +1,7 @@
+(library
+    (name xf_platform_js)
+    (libraries js_of_ocaml)
+    (modes byte)
+    (js_of_ocaml (javascript_files gl_boilerplate.js))
+    (preprocess (pps js_of_ocaml-ppx)))
+
