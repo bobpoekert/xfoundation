@@ -483,20 +483,27 @@ function textTexture(gl, width, height, text, textSize, font, lineHeight, color,
     });
 }
 
+// Provides: vanillaMat
+// Requires: scaleMat
+// Requires: orthographicMat 
+function vanillaMat(quad, width, height) {
+  return scaleMat(orthographicMat, width, height)
+}
+
 // Provides: vanillaQuad
 // Requires: vanillaTextureShader
-// Requires: orthographicMat
-// Requires: scaleMat
+// Requires: vanillaMat
 function vanillaQuad(gl, width, height, tex) {
     var shader = vanillaTextureShader(gl);
 
     var res = {
         texture: tex,
         shader: shader,
-        matrix: scaleMat(orthographicMat, width, height)
+        matrix: vanillaMat(width, height)
     };
     return res;
 }
+
 
 // Provides: textQuad
 // Requires: vanillaQuad
@@ -521,7 +528,7 @@ function colorQuad(gl, width, height, color) {
 function loadImageUrl(url, cb) {
     var img = new Image();
     img.onload = function() {
-        cb(img);
+        cb(img, img.width, img.height);
     };
     img.src = url;
 }
@@ -626,6 +633,7 @@ function renderQuads(gl, quads) {
 
     }
 }
+
 
 // Provides: getPageWidth
 function getPageWidth() {
